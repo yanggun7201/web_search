@@ -1,0 +1,19 @@
+services:
+  searxng:
+    image: searxng/searxng
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+    ports:
+      - "8888:8080"
+
+  web-search:
+    build: .
+    ports:
+      - "8789:8789"
+    environment:
+      - SEARXNG_URL=http://searxng:8080
+      - PORT=8789
+    depends_on:
+      - searxng
+    env_file:
+      - .env
