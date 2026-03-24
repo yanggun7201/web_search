@@ -200,11 +200,16 @@ Docker 서비스가 실행 중인 상태에서, Claude Code 설정에 MCP 서버
   "mcpServers": {
     "web-search": {
       "command": "node",
-      "args": ["/absolute/path/to/web_search/mcp-server.mjs"]
+      "args": ["/absolute/path/to/web_search/mcp-server.mjs"],
+      "env": {
+        "WEB_SEARCH_API_KEY": "your-api-key"
+      }
     }
   }
 }
 ```
+
+`API_KEY`를 설정하지 않은 경우 `WEB_SEARCH_API_KEY`도 생략 가능하다.
 
 ## OpenClaw에서 사용하기
 

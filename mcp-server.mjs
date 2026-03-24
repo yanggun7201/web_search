@@ -3,6 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 
 const BASE_URL = process.env.WEB_SEARCH_URL || 'http://localhost:8789';
+const API_KEY = process.env.WEB_SEARCH_API_KEY || '';
 
 const server = new McpServer({
   name: 'web-search',
@@ -24,7 +25,8 @@ server.tool(
     if (offset) params.set('offset', String(offset));
 
     const url = `${BASE_URL}/res/v1/web/search?${params}`;
-    const res = await fetch(url);
+    const headers = API_KEY ? { 'X-Subscription-Token': API_KEY } : {};
+    const res = await fetch(url, { headers });
 
     if (!res.ok) {
       const err = await res.text();

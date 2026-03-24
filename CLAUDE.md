@@ -40,7 +40,7 @@ Client (OpenClaw etc.)
 
 Root files:
 
-- **mcp-server.mjs** — MCP server (ESM). Wraps the HTTP API as a `web_search` tool for Claude Code etc. Calls the proxy via `WEB_SEARCH_URL` env var (default `http://localhost:8789`), no direct source dependency.
+- **mcp-server.mjs** — MCP server (ESM). Wraps the HTTP API as a `web_search` tool for Claude Code etc. Calls the proxy via `WEB_SEARCH_URL` env var (default `http://localhost:8789`), authenticates via `WEB_SEARCH_API_KEY` env var. No direct source dependency.
 - **docker-compose.yml** — Runs SearXNG + Node.js proxy together. Sets `SEARXNG_URL=http://searxng:8080` for Docker internal network.
 - **Dockerfile** — Node.js 20-slim, `npm ci --omit=dev`, only copies `src/`
 - **searxng/settings.yml** — SearXNG config (JSON format enabled, required for proxy to work)
