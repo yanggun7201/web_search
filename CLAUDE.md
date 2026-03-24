@@ -65,7 +65,6 @@ Root files:
 
 ## Notes
 
-- README is outdated (still references DuckDuckGo as backend). CLAUDE.md is the authoritative doc.
 - README and code comments are in Korean.
 - SearXNG JSON format must be enabled in `searxng/settings.yml` (already configured).
 - Collector writes output to `./state/` directory (created automatically).
