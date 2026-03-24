@@ -5,15 +5,14 @@ const { startCron } = require('./collector');
 
 const app = express();
 const PORT = process.env.PORT || 8789;
-const API_KEY = process.env.API_KEY;
-const FETCH_CONTENT = process.env.FETCH_CONTENT === 'true';
-
 app.get('/res/v1/web/search', async (req, res) => {
   const { q, count, offset } = req.query;
   const start = Date.now();
+  const apiKey = process.env.API_KEY;
+  const fetchContent = process.env.FETCH_CONTENT === 'true';
 
   const token = req.headers['x-subscription-token'] || req.query.token;
-  if (API_KEY && token !== API_KEY) {
+  if (apiKey && token !== apiKey) {
     const ms = Date.now() - start;
     console.log(`[${new Date().toISOString()}] 401 Unauthorized ${ms}ms ${req.originalUrl}`);
     return res.status(401).json({ error: 'Unauthorized: invalid or missing token' });
@@ -29,7 +28,7 @@ app.get('/res/v1/web/search', async (req, res) => {
     const results = await search(q, {
       count: count ? parseInt(count, 10) : 10,
       offset: offset ? parseInt(offset, 10) : 0,
-      fetchContent: FETCH_CONTENT
+      fetchContent
     });
     const ms = Date.now() - start;
     const cached = ms < 10 ? ' [cache]' : '';
@@ -42,7 +41,11 @@ app.get('/res/v1/web/search', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Brave Search proxy running on http://localhost:${PORT}`);
-  startCron();
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Brave Search proxy running on http://localhost:${PORT}`);
+    startCron();
+  });
+}
+
+module.exports = { app };

@@ -113,4 +113,4 @@ async function search(query, options = {}) {
   return response;
 }
 
-module.exports = { search };
+module.exports = { search, cleanText };

@@ -60,6 +60,32 @@ function isArticleUrl(url) {
   }
 }
 
+function isQualityContent(content) {
+  if (content.length < 1500) return false;
+  // 마침표로 끝나는 문장이 5개 이상 있어야 진짜 기사
+  const sentences = content.split(/[.!?]\s/).filter(s => s.length > 40);
+  return sentences.length >= 5;
+}
+
+// Select top N per category (키워드당 최대 2개, 도메인당 최대 2개)
+function diverseSelect(items, limit) {
+  const kwCount = {};
+  const domainCount = {};
+  const picked = [];
+  for (const item of items) {
+    const kw = item.keyword;
+    const domain = new URL(item.url).hostname;
+    if (!item.content || !isQualityContent(item.content)) continue;
+    if ((kwCount[kw] || 0) >= 2) continue;
+    if ((domainCount[domain] || 0) >= 2) continue;
+    picked.push(item);
+    kwCount[kw] = (kwCount[kw] || 0) + 1;
+    domainCount[domain] = (domainCount[domain] || 0) + 1;
+    if (picked.length >= limit) break;
+  }
+  return picked;
+}
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -120,32 +146,6 @@ async function collect() {
   if (!fs.existsSync(rawDir)) fs.mkdirSync(rawDir, { recursive: true });
   fs.writeFileSync(cfg.rawPath, JSON.stringify({ items: deduped }, null, 2));
 
-  function isQualityContent(content) {
-    if (content.length < 1500) return false;
-    // 마침표로 끝나는 문장이 5개 이상 있어야 진짜 기사
-    const sentences = content.split(/[.!?]\s/).filter(s => s.length > 40);
-    return sentences.length >= 5;
-  }
-
-  // Select top N per category (키워드당 최대 2개, 도메인당 최대 2개)
-  function diverseSelect(items, limit) {
-    const kwCount = {};
-    const domainCount = {};
-    const picked = [];
-    for (const item of items) {
-      const kw = item.keyword;
-      const domain = new URL(item.url).hostname;
-      if (!item.content || !isQualityContent(item.content)) continue;
-      if ((kwCount[kw] || 0) >= 2) continue;
-      if ((domainCount[domain] || 0) >= 2) continue;
-      picked.push(item);
-      kwCount[kw] = (kwCount[kw] || 0) + 1;
-      domainCount[domain] = (domainCount[domain] || 0) + 1;
-      if (picked.length >= limit) break;
-    }
-    return picked;
-  }
-
   const selected = [
     ...diverseSelect(buckets.anthropic, cfg.perCategory),
     ...diverseSelect(buckets.ai, cfg.perCategory),
@@ -182,7 +182,7 @@ function startCron() {
   }, { timezone: cfg.cronTz });
 }
 
-module.exports = { collect, startCron };
+module.exports = { collect, startCron, categorize, isArticleUrl, isQualityContent, diverseSelect };
 
 // 단독 실행: node collector.js --now
 if (require.main === module && process.argv.includes('--now')) {
